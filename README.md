@@ -1,70 +1,107 @@
 # Hybrid-Inheritance-Dimond-Problem-
-#include <iostream>
-#include <string>
-using namespace std;
+#include #include using namespace std;
 
-class Student {
-private:
-    int rollNumber;
-    string name;
-    float marks[3]; // marks for 3 subjects
-    float total;
-    float percentage;
-    string result;
+// Hybrid Inheritance - Diamond Problem class Person { protected: string name; int age;
 
-public:
-    // Function to accept student details
-    void acceptDetails() {
-        cout << "Enter Roll Number: ";
-        cin >> rollNumber;
-        cin.ignore(); // clear input buffer
-        cout << "Enter Name: ";
-        getline(cin, name);
-        cout << "Enter marks for 3 subjects: ";
-        for (int i = 0; i < 3; i++) {
-            cin >> marks[i];
-        }
-    }
+public: Person() { name = "Unknown"; age = 0; }
 
-    // Function to calculate result
-    void calculateResult() {
-        total = 0;
-        for (int i = 0; i < 3; i++) {
-            total += marks[i];
-        }
-        percentage = total / 3.0;
-        
-        if (percentage >= 60) {
-            result = "First Class";
-        } else if (percentage >= 50) {
-            result = "Second Class";
-        } else if (percentage >= 40) {
-            result = "Pass";
-        } else {
-            result = "Fail";
-        }
-    }
+Person(string n, int a) {
+    name = n;
+    age = a;
+}
 
-    // Function to display student details
-    void displayDetails() {
-        cout << "\n----- Student Details -----" << endl;
-        cout << "Roll Number: " << rollNumber << endl;
-        cout << "Name: " << name << endl;
-        cout << "Marks: ";
-        for (int i = 0; i < 3; i++) {
-            cout << marks[i] << " ";
-        }
-        cout << endl;
-        cout << "Total Marks: " << total << endl;
-        cout << "Percentage: " << percentage << "%" << endl;
-        cout << "Result: " << result << endl;
-    }
+void display() {
+    cout << "Name: " << name << endl;
+    cout << "Age: " << age << endl;
+}
 };
 
-int main() {
-    Student s;
-    s.acceptDetails();
-    s.calculateResult();
-    s.displayDetails();
-    return 0;
+// Virtual inheritance to solve diamond problem class Student : virtual public Person { protected: int rollNumber; string course;
+
+public: Student() : Person() { rollNumber = 0; course = "Unknown"; }
+
+Student(string n, int a, int roll, string c) 
+    : Person(n, a) {
+    rollNumber = roll;
+    course = c;
+}
+
+void displayStudent() {
+    display();
+    cout << "Roll Number: " << rollNumber << endl;
+    cout << "Course: " << course << endl;
+}
+};
+
+class Employee : virtual public Person { protected: int employeeId; float salary;
+
+public: Employee() : Person() { employeeId = 0; salary = 0; }
+
+Employee(string n, int a, int id, float s) 
+    : Person(n, a) {
+    employeeId = id;
+    salary = s;
+}
+
+void displayEmployee() {
+    display();
+    cout << "Employee ID: " << employeeId << endl;
+    cout << "Salary: " << salary << endl;
+}
+};
+
+// Multiple inheritance - Hybrid class WorkingStudent : public Student, public Employee { private: int workHours;
+
+public: WorkingStudent() : Person(), Student(), Employee() { workHours = 0; }
+
+WorkingStudent(string n, int a, int roll, string c, 
+               int id, float s, int hours) 
+    : Person(n, a), Student(n, a, roll, c), Employee(n, a, id, s) {
+    workHours = hours;
+}
+
+void displayWorkingStudent() {
+    // Calling display() from Person class - now unambiguous
+    display();
+    cout << "Roll Number: " << rollNumber << endl;
+    cout << "Course: " << course << endl;
+    cout << "Employee ID: " << employeeId << endl;
+    cout << "Salary: " << salary << endl;
+    cout << "Work Hours: " << workHours << endl;
+}
+};
+
+// Class for demonstrating ambiguity resolution class Base1 { public: void show() { cout << "Base1 Show" << endl; }
+
+void display() {
+    cout << "Base1 Display" << endl;
+}
+};
+
+class Base2 { public: void show() { cout << "Base2 Show" << endl; }
+
+void print() {
+    cout << "Base2 Print" << endl;
+}
+};
+
+class Derived : public Base1, public Base2 { public: void show() { // Override show to resolve ambiguity cout << "Derived Show" << endl; }
+
+void resolveAmbiguity() {
+    // Using scope resolution operator
+    Base1::show();  // Call Base1's show
+    Base2::show();  // Call Base2's show
+    display();      // No ambiguity - only in Base1
+    print();        // No ambiguity - only in Base2
+}
+};
+
+int main() { cout << "===== Hybrid Inheritance - Working Student (Diamond Problem) =====" << endl; WorkingStudent ws("Bob Johnson", 25, 202, "Computer Science", 5001, 45000, 20); ws.displayWorkingStudent();
+
+cout << "\n===== Ambiguity Resolution =====" << endl;
+Derived d;
+d.show();  // Calls Derived's show
+d.resolveAmbiguity();
+
+return 0;
 }
